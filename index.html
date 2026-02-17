@@ -41,8 +41,8 @@
     .screen { display: none; width: 100%; height: 100%; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
     .screen.active { display: flex; }
 
-    /* SCROLLBAR */
-    ::-webkit-scrollbar { width: 8px; }
+    /* SCROLLBAR GERAL */
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
     ::-webkit-scrollbar-thumb { background: #ced4da; border-radius: 4px; }
 
     /* TELA INICIAL (Saguão) */
@@ -65,15 +65,13 @@
     .btn-danger { background: #fee2e2; border-color: #f87171; color: var(--bad); }
     .btn-danger:hover { background: #fecaca; }
 
-    .exam-layout { width: min(1100px, 100%); display: grid; grid-template-columns: 1fr 300px; gap: 16px; flex: 1; min-height: 0; }
-    @media (max-width: 800px) { .exam-layout { grid-template-columns: 1fr; } }
+    .exam-layout { width: min(1100px, 100%); display: grid; grid-template-columns: 1fr 300px; gap: 16px; flex: 1; min-height: 0; padding-bottom: 80px; }
 
     /* CARD DA QUESTÃO */
     .question-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; box-shadow: var(--shadow); overflow: hidden; }
     .q-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; color: var(--txt-muted); background: #f8f9fa; }
     .q-body { padding: 24px 20px; overflow-y: auto; flex: 1; font-size: 16px; line-height: 1.6; }
     
-    /* IMAGEM DA QUESTÃO */
     #qImage { max-width: 100%; max-height: 350px; border-radius: 8px; margin-bottom: 20px; display: none; object-fit: contain; border: 1px solid var(--border); }
     
     .q-text { margin-bottom: 24px; white-space: pre-wrap; }
@@ -91,7 +89,7 @@
     .btn-nav.review { border-color: #fcd34d; background: #fffbeb; color: #b45309; }
     .btn-nav.review.active { background: var(--review); color: #fff; border-color: var(--review); }
 
-    /* GRID LATERAL (MAPA DA PROVA) */
+    /* GRID LATERAL (MAPA DA PROVA) - Padrão Desktop */
     .grid-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; box-shadow: var(--shadow); max-height: 100%; overflow-y: auto; }
     .grid-title { font-size: 14px; font-weight: 700; margin-bottom: 12px; color: var(--txt-muted); text-align: center; }
     .grid-boxes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
@@ -103,6 +101,46 @@
     
     .g-box-redacao { grid-column: span 5; aspect-ratio: auto; padding: 10px; background: #f8f9fa; border: 2px dashed #ced4da; }
     .g-box-redacao.answered { background: #dcfce7; border-color: var(--good); color: #166534; border-style: solid; }
+
+    /* ==========================================================
+       ADAPTAÇÃO EXCLUSIVA PARA CELULAR (iPhone / Smartphones)
+       ========================================================== */
+    @media (max-width: 800px) { 
+      .exam-layout { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 12px;
+      }
+      .grid-panel { 
+        padding: 12px 16px; 
+        max-height: unset; /* Permite que seja fininho */
+      } 
+      .grid-title { 
+        text-align: left; 
+        margin-bottom: 8px; 
+        font-size: 13px; 
+      }
+      .grid-boxes { 
+        display: flex; /* Muda de grade quadrada para linha reta */
+        flex-wrap: nowrap; 
+        overflow-x: auto; /* Habilita rolagem lateral */
+        gap: 10px; 
+        padding-bottom: 8px; /* Espaço para não cortar a bordinha */
+      }
+      .grid-boxes::-webkit-scrollbar { height: 4px; } /* Deixa a barra fininha */
+      .g-box { 
+        flex: 0 0 45px; /* Trava o tamanho do botão */
+        height: 45px; 
+        aspect-ratio: auto; 
+        font-size: 14px;
+      }
+      .g-box-redacao { 
+        flex: 0 0 130px; /* Alarga o botão da redação na linha */
+      }
+      .q-footer {
+        flex-wrap: wrap; /* Em celulares muito finos os botões podem se ajustar */
+      }
+    }
 
     /* TELA DE RELATÓRIO */
     .report-container { width: min(800px, 100%); background: var(--bg-card); padding: 30px; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); margin: auto; }
@@ -128,7 +166,6 @@
     .rg-box.miss { background: var(--bad); }
     .rg-box.blank { background: #e9ecef; color: var(--txt-muted); border: 1px solid #ced4da; }
 
-    /* Detalhamento de Erros */
     .r-details { margin-top: 30px; text-align: left; }
     .r-detail-item { padding: 16px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 10px; font-size: 14px; background: #fff; }
     .r-detail-item.miss { background: #fef2f2; border-left: 5px solid var(--bad); }
@@ -220,7 +257,7 @@
         Redação: Não realizada
       </div>
 
-      <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--txt-muted); text-align: center;">Gabarito Correção</h3>
+      <h3 style="font-size: 16px; margin-bottom: 12px; color: var(--txt-muted); text-align: center;">Gabarito Geral</h3>
       <div class="r-grid" id="rGrid"></div>
 
       <div id="rDetails" class="r-details"></div>
@@ -352,7 +389,7 @@
         document.getElementById('qText').textContent = "PROVA PAUSADA";
         imgEl.style.display = "none";
       } else {
-        renderQuestion(); // Recarrega a questão normal (incluindo imagem)
+        renderQuestion(); 
       }
     }
 
@@ -360,7 +397,7 @@
        RENDERIZAÇÃO DA QUESTÃO
        ========================================================= */
     function renderQuestion() {
-      if(isPaused) return; // Se estiver pausado, não renderiza o texto original
+      if(isPaused) return; 
       
       const q = examData[currentIdx];
       
@@ -369,7 +406,7 @@
       document.getElementById('qMateriaDisplay').textContent = q.mat;
       document.getElementById('qText').textContent = q.text;
 
-      // === LÓGICA DE CARREGAMENTO DA IMAGEM ===
+      // LÓGICA DE CARREGAMENTO DA IMAGEM
       const imgEl = document.getElementById('qImage');
       if (q.img) {
         imgEl.src = "imagens/" + q.img;
@@ -439,7 +476,7 @@
     }
 
     /* =========================================================
-       GRADE / MAPA DA PROVA
+       GRADE / MAPA DA PROVA (AUTO-SCROLL INCLUSO)
        ========================================================= */
     function buildGrid() {
       const grid = document.getElementById('gridMap');
@@ -478,7 +515,14 @@
       document.querySelectorAll('.g-box').forEach(b => b.classList.remove('current'));
       let currId = examData[currentIdx].id;
       let box = document.getElementById(`gb-${currId}`);
-      if(box) box.classList.add('current');
+      if(box) {
+        box.classList.add('current');
+        
+        // ROLAGEM AUTOMÁTICA NO MOBILE
+        if (window.innerWidth <= 800) {
+          box.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+        }
+      }
     }
 
     /* =========================================================
