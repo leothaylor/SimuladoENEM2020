@@ -72,6 +72,10 @@
     .question-panel { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; box-shadow: var(--shadow); overflow: hidden; }
     .q-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; font-weight: 700; color: var(--txt-muted); background: #f8f9fa; }
     .q-body { padding: 24px 20px; overflow-y: auto; flex: 1; font-size: 16px; line-height: 1.6; }
+    
+    /* IMAGEM DA QUESTÃO */
+    #qImage { max-width: 100%; max-height: 350px; border-radius: 8px; margin-bottom: 20px; display: none; object-fit: contain; border: 1px solid var(--border); }
+    
     .q-text { margin-bottom: 24px; white-space: pre-wrap; }
     
     .alts { display: flex; flex-direction: column; gap: 10px; }
@@ -181,6 +185,7 @@
           <span id="qMateriaDisplay">Módulo</span>
         </div>
         <div class="q-body">
+          <img id="qImage" src="" alt="Imagem da questão" />
           <div class="q-text" id="qText">Carregando...</div>
           <div class="alts" id="qAlts"></div>
         </div>
@@ -246,18 +251,16 @@
       D2: []
     };
 
-    // Montagem do Dia 1
     if (typeof window.DB_LINGUAGENS !== 'undefined') DB.D1.push(...window.DB_LINGUAGENS);
     if (typeof window.DB_HUMANAS !== 'undefined') DB.D1.push(...window.DB_HUMANAS);
     
-    // Insere a Redação sempre no final do Dia 1
+    // Insere a Redação
     DB.D1.push({ 
       id: "RED-91", mat: "Redação Oficial (ENEM 2020)", type: "essay", 
       text: "A partir da leitura dos textos motivadores e com base nos conhecimentos construídos ao longo de sua formação, redija um texto dissertativo-argumentativo em modalidade escrita formal da língua portuguesa sobre o tema:\n\n\"O estigma associado às doenças mentais na sociedade brasileira\"\n\n(Lembre-se: escreva sua redação à mão em uma folha. Marque abaixo apenas se você a concluiu ou se pulou).", 
       alts: ["✅ Feito (Escrevi a redação)", "❌ Não feito (Pulei a redação)"], answer: null 
     });
 
-    // Montagem do Dia 2
     if (typeof window.DB_NATUREZA !== 'undefined') DB.D2.push(...window.DB_NATUREZA);
     if (typeof window.DB_MATEMATICA !== 'undefined') DB.D2.push(...window.DB_MATEMATICA);
 
@@ -271,7 +274,6 @@
     let userAnswers = {}; 
     let reviewMarks = new Set(); 
     
-    // Timer
     let totalSeconds = 0;
     let elapsedSeconds = 0;
     let timerInterval = null;
@@ -344,20 +346,38 @@
       document.getElementById('btnPause').textContent = isPaused ? "▶ Retomar" : "Pausar";
       document.getElementById('qAlts').style.opacity = isPaused ? "0.2" : "1";
       document.getElementById('qAlts').style.pointerEvents = isPaused ? "none" : "auto";
-      document.getElementById('qText').textContent = isPaused ? "PROVA PAUSADA" : examData[currentIdx].text;
+      
+      const imgEl = document.getElementById('qImage');
+      if(isPaused) {
+        document.getElementById('qText').textContent = "PROVA PAUSADA";
+        imgEl.style.display = "none";
+      } else {
+        renderQuestion(); // Recarrega a questão normal (incluindo imagem)
+      }
     }
 
     /* =========================================================
        RENDERIZAÇÃO DA QUESTÃO
        ========================================================= */
     function renderQuestion() {
+      if(isPaused) return; // Se estiver pausado, não renderiza o texto original
+      
       const q = examData[currentIdx];
       
       let qNumText = q.type === 'essay' ? `Redação` : `Questão ${currentIdx + 1}`;
       document.getElementById('qIdDisplay').textContent = qNumText;
       document.getElementById('qMateriaDisplay').textContent = q.mat;
-      
-      if(!isPaused) document.getElementById('qText').textContent = q.text;
+      document.getElementById('qText').textContent = q.text;
+
+      // === LÓGICA DE CARREGAMENTO DA IMAGEM ===
+      const imgEl = document.getElementById('qImage');
+      if (q.img) {
+        imgEl.src = "imagens/" + q.img;
+        imgEl.style.display = "block";
+      } else {
+        imgEl.style.display = "none";
+        imgEl.src = "";
+      }
 
       const altsContainer = document.getElementById('qAlts');
       altsContainer.innerHTML = "";
